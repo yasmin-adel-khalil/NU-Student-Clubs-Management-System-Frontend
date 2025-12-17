@@ -1,0 +1,303 @@
+<div class="min-h-screen bg-slate-50">
+  <!-- Header -->
+  <header class="border-b border-slate-200 bg-white/80 backdrop-blur sticky top-0 z-10">
+    <div class="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+      <div>
+        <h1 class="text-2xl font-bold text-slate-900">Admin Dashboard</h1>
+        <p class="text-sm text-slate-500">Manage admins, board members, and committees</p>
+      </div>
+    </div>
+  </header>
+
+  <!-- Navigation Tabs -->
+  <div class="border-b border-slate-200 bg-white">
+    <div class="mx-auto flex max-w-7xl px-6">
+      <button
+        (click)="setActiveTab('overview')"
+        [class.border-blue-600]="activeTab === 'overview'"
+        [class.text-slate-600]="activeTab !== 'overview'"
+        class="border-b-2 border-transparent px-4 py-4 text-sm font-medium text-blue-600 transition"
+      >
+        Overview
+      </button>
+      <button
+        (click)="setActiveTab('admins')"
+        [class.border-blue-600]="activeTab === 'admins'"
+        [class.text-slate-600]="activeTab !== 'admins'"
+        class="border-b-2 border-transparent px-4 py-4 text-sm font-medium text-blue-600 transition"
+      >
+        Admins
+      </button>
+      <button
+        (click)="setActiveTab('board-members')"
+        [class.border-blue-600]="activeTab === 'board-members'"
+        [class.text-slate-600]="activeTab !== 'board-members'"
+        class="border-b-2 border-transparent px-4 py-4 text-sm font-medium text-blue-600 transition"
+      >
+        Board Members
+      </button>
+      <button
+        (click)="setActiveTab('committees')"
+        [class.border-blue-600]="activeTab === 'committees'"
+        [class.text-slate-600]="activeTab !== 'committees'"
+        class="border-b-2 border-transparent px-4 py-4 text-sm font-medium text-blue-600 transition"
+      >
+        Committees
+      </button>
+    </div>
+  </div>
+
+  <!-- Error Alert -->
+  @if (error) {
+    <div class="mx-auto max-w-7xl px-6 py-4">
+      <div class="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+        {{ error }}
+      </div>
+    </div>
+  }
+
+  <!-- Content -->
+  <div class="mx-auto max-w-7xl px-6 py-8">
+    <!-- Overview Tab -->
+    @if (activeTab === 'overview') {
+      <div class="space-y-8">
+        <!-- Stats Grid -->
+        <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <!-- Total Admins -->
+          <div class="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm text-slate-600">Total Admins</p>
+                <p class="mt-1 text-3xl font-bold text-slate-900">{{ stats.totalAdmins }}</p>
+              </div>
+              <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-blue-100 text-blue-600">
+                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          <!-- Total Board Members -->
+          <div class="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm text-slate-600">Board Members</p>
+                <p class="mt-1 text-3xl font-bold text-slate-900">{{ stats.totalBoardMembers }}</p>
+              </div>
+              <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-purple-100 text-purple-600">
+                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.856-1.487M15 10a3 3 0 11-6 0 3 3 0 016 0zM4.318 20H20v-2a4 4 0 00-7.225-1.62" />
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          <!-- Active Board Members -->
+          <div class="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm text-slate-600">Active Members</p>
+                <p class="mt-1 text-3xl font-bold text-slate-900">{{ stats.activeBoardMembers }}</p>
+              </div>
+              <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-green-100 text-green-600">
+                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          <!-- Total Committees -->
+          <div class="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm text-slate-600">Committees</p>
+                <p class="mt-1 text-3xl font-bold text-slate-900">{{ stats.totalCommittees }}</p>
+              </div>
+              <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-amber-100 text-amber-600">
+                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                </svg>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+          <h2 class="mb-4 text-lg font-semibold text-slate-900">Quick Actions</h2>
+          <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <button class="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-700 hover:bg-slate-100">
+              Add Admin
+            </button>
+            <button class="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-700 hover:bg-slate-100">
+              Add Board Member
+            </button>
+            <button class="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-700 hover:bg-slate-100">
+              Create Committee
+            </button>
+            <button class="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-700 hover:bg-slate-100">
+              View Reports
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- Admins Tab -->
+    @if (activeTab === 'admins') {
+      <div class="rounded-lg border border-slate-200 bg-white shadow-sm">
+        <div class="flex items-center justify-between border-b border-slate-200 px-6 py-4">
+          <h2 class="text-lg font-semibold text-slate-900">Admin Accounts</h2>
+          <button class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700">
+            Add Admin
+          </button>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full">
+            <thead class="border-b border-slate-200 bg-slate-50">
+              <tr>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-slate-700">Admin ID</th>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-slate-700">User ID</th>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-slate-700">Role</th>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-slate-700">Permissions</th>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-slate-700">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (admin of admins; track admin.id) {
+                <tr class="border-b border-slate-200 hover:bg-slate-50">
+                  <td class="px-6 py-4 text-sm text-slate-900">{{ admin.id }}</td>
+                  <td class="px-6 py-4 text-sm text-slate-600">{{ admin.userId }}</td>
+                  <td class="px-6 py-4 text-sm">
+                    <span class="inline-flex rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">
+                      {{ admin.role }}
+                    </span>
+                  </td>
+                  <td class="px-6 py-4 text-sm text-slate-600">
+                    {{ admin.permissions.length || 0 }} permissions
+                  </td>
+                  <td class="px-6 py-4 text-sm">
+                    <div class="flex gap-2">
+                      <button class="text-blue-600 hover:text-blue-700">Edit</button>
+                      <button class="text-red-600 hover:text-red-700">Delete</button>
+                    </div>
+                  </td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="5" class="px-6 py-8 text-center text-sm text-slate-500">
+                    No admins found
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    }
+
+    <!-- Board Members Tab -->
+    @if (activeTab === 'board-members') {
+      <div class="rounded-lg border border-slate-200 bg-white shadow-sm">
+        <div class="flex items-center justify-between border-b border-slate-200 px-6 py-4">
+          <h2 class="text-lg font-semibold text-slate-900">Board Members</h2>
+          <button class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700">
+            Add Member
+          </button>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full">
+            <thead class="border-b border-slate-200 bg-slate-50">
+              <tr>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-slate-700">Member ID</th>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-slate-700">User Name</th>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-slate-700">Club</th>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-slate-700">Position</th>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-slate-700">Status</th>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-slate-700">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (member of boardMembers; track member.id) {
+                <tr class="border-b border-slate-200 hover:bg-slate-50">
+                  <td class="px-6 py-4 text-sm text-slate-900">{{ member.id }}</td>
+                  <td class="px-6 py-4 text-sm text-slate-600">{{ member.userName || 'N/A' }}</td>
+                  <td class="px-6 py-4 text-sm text-slate-600">{{ member.clubName || 'N/A' }}</td>
+                  <td class="px-6 py-4 text-sm font-medium text-slate-900">{{ member.position }}</td>
+                  <td class="px-6 py-4 text-sm">
+                    @if (member.isActive) {
+                      <span class="inline-flex rounded-full bg-green-50 px-3 py-1 text-xs font-semibold text-green-700">
+                        Active
+                      </span>
+                    } @else {
+                      <span class="inline-flex rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
+                        Inactive
+                      </span>
+                    }
+                  </td>
+                  <td class="px-6 py-4 text-sm">
+                    <div class="flex gap-2">
+                      <button class="text-blue-600 hover:text-blue-700">Edit</button>
+                      <button class="text-red-600 hover:text-red-700">Remove</button>
+                    </div>
+                  </td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="6" class="px-6 py-8 text-center text-sm text-slate-500">
+                    No board members found
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    }
+
+    <!-- Committees Tab -->
+    @if (activeTab === 'committees') {
+      <div class="rounded-lg border border-slate-200 bg-white shadow-sm">
+        <div class="flex items-center justify-between border-b border-slate-200 px-6 py-4">
+          <h2 class="text-lg font-semibold text-slate-900">Committees</h2>
+          <button class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700">
+            Create Committee
+          </button>
+        </div>
+        <div class="grid gap-6 p-6 sm:grid-cols-2 lg:grid-cols-3">
+          @for (committee of committees; track committee.id) {
+            <div class="rounded-lg border border-slate-200 p-4 hover:border-slate-300">
+              <div class="flex items-start justify-between">
+                <div>
+                  <h3 class="font-semibold text-slate-900">{{ committee.name }}</h3>
+                  <p class="mt-1 text-xs text-slate-500">{{ committee.clubName || 'N/A' }}</p>
+                </div>
+                @if (committee.isActive) {
+                  <span class="inline-flex rounded-full bg-green-50 px-2 py-1 text-xs font-semibold text-green-700">
+                    Active
+                  </span>
+                }
+              </div>
+              <p class="mt-3 text-sm text-slate-600">{{ committee.description }}</p>
+              <div class="mt-4 flex items-center justify-between border-t border-slate-200 pt-4">
+                <span class="text-xs text-slate-500">
+                  {{ committee.memberCount || 0 }} members
+                </span>
+                <div class="flex gap-2">
+                  <button class="text-xs text-blue-600 hover:text-blue-700">Edit</button>
+                  <button class="text-xs text-red-600 hover:text-red-700">Delete</button>
+                </div>
+              </div>
+            </div>
+          } @empty {
+            <div class="col-span-full py-8 text-center text-sm text-slate-500">
+              No committees found
+            </div>
+          }
+        </div>
+      </div>
+    }
+  </div>
+</div>
