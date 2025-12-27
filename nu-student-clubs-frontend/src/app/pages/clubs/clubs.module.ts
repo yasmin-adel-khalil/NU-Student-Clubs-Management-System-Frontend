@@ -2,6 +2,8 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Routes } from '@angular/router';
 import { Component } from '@angular/core';
+import { ClubDetailsComponent } from './club-details.component';
+import { ClubListComponent } from './club-list.component';
 
 @Component({
   selector: 'app-clubs',
@@ -13,14 +15,20 @@ export class ClubsComponent { }
 const routes: Routes = [
   {
     path: '',
-    component: ClubsComponent
+    component: ClubListComponent
+  },
+  {
+    path: ':id',
+    component: ClubDetailsComponent
   }
 ];
 
 @NgModule({
   imports: [
     CommonModule,
-    RouterModule.forChild(routes)
+    RouterModule.forChild(routes),
+    ClubDetailsComponent,
+    ClubListComponent
   ]
 })
 export class ClubsModule { }
