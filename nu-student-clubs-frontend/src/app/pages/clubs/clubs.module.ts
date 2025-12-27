@@ -1,4 +1,5 @@
 import { NgModule } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { RouterModule, Routes } from '@angular/router';
 import { ClubListComponent } from './club-list/club-list';
 import { ClubDetailsComponent } from './club-details/club-details';
@@ -21,6 +22,7 @@ const routes: Routes = [
 
 @NgModule({
   imports: [
+    CommonModule,
     ClubListComponent,
     ClubDetailsComponent,
     MyMembershipsComponent,
