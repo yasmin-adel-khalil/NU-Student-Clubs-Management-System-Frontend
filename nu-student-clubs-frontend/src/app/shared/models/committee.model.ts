@@ -28,17 +28,19 @@ export interface CommitteeResponse {
 export interface CreateCommitteeRequest {
   name: string;
   description: string;
-  club: { id: number };
-  headId?: string;
+  clubName?: string;
+  headName?: string;
+  club?: { id: number };
   memberIds?: string[];
 }
 
 export interface UpdateCommitteeRequest {
   name?: string;
   description?: string;
-  headId?: string;
+  headName?: string;
   memberIds?: string[];
   isActive?: boolean;
+  clubName?: string;
   club?: { id: number };
 }
 

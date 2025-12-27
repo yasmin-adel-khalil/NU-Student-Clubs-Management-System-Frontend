@@ -1,57 +1,22 @@
-export interface Admin {
-  id: number;
-  email: string;
-  password: string;
-  firstName: string;
-  lastName: string;
-  phone?: string;
-  profilePicture?: string;
-  active: boolean;
-  department?: string;
-  adminLevel?: string;
-  canManageAdmins: boolean;
-  canManageApplications: boolean;
-  canManageClubs: boolean;
-  roles: string[];
-  createdAt: number;
-  updatedAt: number;
-}
-
 export interface AdminResponse {
   id: number;
-  email: string;
-  password: string;
-  firstName: string;
-  lastName: string;
-  phone?: string;
-  profilePicture?: string;
-  active: boolean;
-  department?: string;
-  adminLevel?: string;
-  canManageAdmins: boolean;
-  canManageApplications: boolean;
-  canManageClubs: boolean;
-  roles: string[];
-  createdAt: number;
-  updatedAt: number;
+  name: string;
+  position: string;
+  club: string;
+  committee: string;
+  season: number | null;
 }
 
 export interface CreateAdminRequest {
-  email: string;
-  password: string;
-  firstName: string;
-  lastName: string;
-  department?: string;
-  adminLevel?: string;
-  permissions?: string[];
+  name: string;
+  position: string;
+  club: string;
+  season: number | null;
 }
 
 export interface UpdateAdminRequest {
-  email?: string;
-  password?: string;
-  firstName?: string;
-  lastName?: string;
-  department?: string;
-  adminLevel?: string;
-  permissions?: string[];
+  name?: string;
+  position?: string;
+  club?: string;
+  season?: number | null;
 }

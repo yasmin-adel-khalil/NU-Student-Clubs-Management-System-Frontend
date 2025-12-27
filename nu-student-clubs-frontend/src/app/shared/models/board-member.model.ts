@@ -22,6 +22,7 @@ export interface BoardMemberResponse {
   season?: string;
   userName?: string;
   clubName?: string;
+  committee?: string;
 }
 
 export interface CreateBoardMemberRequest {

@@ -1,13 +1,17 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
+import { finalize, takeUntil } from 'rxjs/operators';
+import { Subject } from 'rxjs';
 import { AdminService } from '../../../core/services/admin.service';
 import { BoardMemberService } from '../../../core/services/board-member.service';
 import { CommitteeService } from '../../../core/services/committee.service';
+import { ClubService } from '../../../core/services/club.service';
 import { AdminResponse } from '../../../shared/models/admin.model';
 import { BoardMemberResponse } from '../../../shared/models/board-member.model';
 import { CommitteeResponse } from '../../../shared/models/committee.model';
+import { Club } from '../../../shared/models/club.model';
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -16,12 +20,15 @@ import { CommitteeResponse } from '../../../shared/models/committee.model';
   templateUrl: './admin-dashboard.component.html',
   styleUrl: './admin-dashboard.component.css'
 })
-export class AdminDashboardComponent implements OnInit {
+export class AdminDashboardComponent implements OnInit, OnDestroy {
+  private destroy$ = new Subject<void>();
+  
   activeTab: 'overview' | 'admins' | 'board-members' | 'committees' = 'overview';
   
   admins: AdminResponse[] = [];
   boardMembers: BoardMemberResponse[] = [];
   committees: CommitteeResponse[] = [];
+  clubs: Club[] = [];
   
   loading = false;
   error: string | null = null;
@@ -37,21 +44,18 @@ export class AdminDashboardComponent implements OnInit {
   editingCommitteeId: number | null = null;
 
   adminForm = {
-    email: '',
-    password: '',
-    firstName: '',
-    lastName: '',
-    department: '',
-    adminLevel: '',
-    permissions: '' // comma separated
+    name: '',
+    position: '',
+    club: '',
+    season: new Date().getFullYear()
   };
 
-  // Edit form for admin (without email and password)
+  // Edit form for admin
   adminEditForm = {
-    firstName: '',
-    lastName: '',
-    department: '',
-    adminLevel: ''
+    name: '',
+    position: '',
+    club: '',
+    season: new Date().getFullYear()
   };
 
   boardMemberForm = {
@@ -62,14 +66,15 @@ export class AdminDashboardComponent implements OnInit {
     clubId: '',
     position: '',
     joinDate: '',
+    committee: '',
     season: new Date().getFullYear().toString()
   };
 
   committeeForm = {
     name: '',
-    clubId: '',
+    clubName: '',
     description: '',
-    headId: ''
+    headName: ''
   };
 
   stats = {
@@ -84,7 +89,8 @@ export class AdminDashboardComponent implements OnInit {
   constructor(
     private adminService: AdminService,
     private boardMemberService: BoardMemberService,
-    private committeeService: CommitteeService
+    private committeeService: CommitteeService,
+    private clubService: ClubService
   ) {}
 
   ngOnInit(): void {
@@ -95,7 +101,10 @@ export class AdminDashboardComponent implements OnInit {
     this.loading = true;
     this.error = null;
 
-    this.adminService.getAllAdmins().subscribe({
+    this.adminService.getAllAdmins().pipe(
+      takeUntil(this.destroy$),
+      finalize(() => this.loading = false)
+    ).subscribe({
       next: (data: AdminResponse[]) => {
         this.admins = data;
         this.stats.totalAdmins = data.length;
@@ -106,7 +115,9 @@ export class AdminDashboardComponent implements OnInit {
       }
     });
 
-    this.boardMemberService.getAllBoardMembers().subscribe({
+    this.boardMemberService.getAllBoardMembers().pipe(
+      takeUntil(this.destroy$)
+    ).subscribe({
       next: (data: BoardMemberResponse[]) => {
         this.boardMembers = data;
         this.stats.totalBoardMembers = data.length;
@@ -118,16 +129,27 @@ export class AdminDashboardComponent implements OnInit {
       }
     });
 
-    this.committeeService.getAllCommittees().subscribe({
+    this.committeeService.getAllCommittees().pipe(
+      takeUntil(this.destroy$)
+    ).subscribe({
       next: (data: CommitteeResponse[]) => {
         this.committees = data;
         this.stats.totalCommittees = data.length;
-        this.loading = false;
       },
       error: (err: any) => {
         this.error = 'Failed to load committees';
         console.error(err);
-        this.loading = false;
+      }
+    });
+
+    this.clubService.getAllClubs().pipe(
+      takeUntil(this.destroy$)
+    ).subscribe({
+      next: (clubs: Club[]) => {
+        this.clubs = clubs;
+      },
+      error: (err: any) => {
+        console.error('Failed to load clubs', err);
       }
     });
   }
@@ -157,25 +179,28 @@ export class AdminDashboardComponent implements OnInit {
   submitAdmin(): void {
     this.error = null;
     this.success = null;
+    this.loading = true;
 
     if (this.editingAdminId) {
-      // Edit mode - use adminEditForm without email and password
       const request = {
-        firstName: this.adminEditForm.firstName,
-        lastName: this.adminEditForm.lastName,
-        department: this.adminEditForm.department,
-        adminLevel: this.adminEditForm.adminLevel
+        name: this.adminEditForm.name,
+        position: this.adminEditForm.position,
+        club: this.adminEditForm.club,
+        season: Number(this.adminEditForm.season)
       };
 
-      this.adminService.updateAdmin(this.editingAdminId.toString(), request as any).subscribe({
+      this.adminService.updateAdmin(this.editingAdminId.toString(), request as any).pipe(
+        finalize(() => this.loading = false)
+      ).subscribe({
         next: (updated) => {
           const index = this.admins.findIndex(a => a.id === this.editingAdminId!);
           if (index >= 0) {
-            this.admins = [...this.admins.slice(0, index), updated, ...this.admins.slice(index + 1)];
+            this.admins[index] = updated as any;
+            this.admins = [...this.admins];
           }
           this.showAddAdmin = false;
           this.editingAdminId = null;
-          this.adminEditForm = { firstName: '', lastName: '', department: '', adminLevel: '' };
+          this.adminEditForm = { name: '', position: '', club: '', season: new Date().getFullYear() };
           this.success = 'Admin updated successfully';
         },
         error: () => {
@@ -183,25 +208,18 @@ export class AdminDashboardComponent implements OnInit {
         }
       });
     } else {
-      // Create mode - use adminForm with email and password
-      const permissionsArray = this.adminForm.permissions
-        .split(',')
-        .map(p => p.trim())
-        .filter(Boolean);
-
       const request = {
-        email: this.adminForm.email,
-        password: this.adminForm.password,
-        firstName: this.adminForm.firstName,
-        lastName: this.adminForm.lastName,
-        department: this.adminForm.department,
-        adminLevel: this.adminForm.adminLevel,
-        permissions: permissionsArray
+        name: this.adminForm.name,
+        position: this.adminForm.position,
+        club: this.adminForm.club,
+        season: Number(this.adminForm.season)
       };
-      this.adminService.createAdmin(request).subscribe({
+      this.adminService.createAdmin(request).pipe(
+        finalize(() => this.loading = false)
+      ).subscribe({
         next: created => {
           this.showAddAdmin = false;
-          this.adminForm = { email: '', password: '', firstName: '', lastName: '', department: '', adminLevel: '', permissions: '' };
+          this.adminForm = { name: '', position: '', club: '', season: new Date().getFullYear() };
           this.admins = [...this.admins, created as any];
           this.stats.totalAdmins = this.admins.length;
           this.success = 'Admin added successfully';
@@ -217,10 +235,10 @@ export class AdminDashboardComponent implements OnInit {
   editAdmin(admin: any): void {
     this.editingAdminId = admin.id;
     this.adminEditForm = {
-      firstName: admin.firstName,
-      lastName: admin.lastName,
-      department: admin.department || '',
-      adminLevel: admin.adminLevel || ''
+      name: admin.name,
+      position: admin.position,
+      club: admin.club,
+      season: admin.season || new Date().getFullYear()
     };
     this.showAddAdmin = true;
     this.activeTab = 'admins';
@@ -229,14 +247,25 @@ export class AdminDashboardComponent implements OnInit {
 
   deleteAdmin(id: number): void {
     if (confirm('Are you sure you want to delete this admin?')) {
-      this.adminService.deleteAdmin(id.toString()).subscribe({
+      this.loading = true;
+      this.adminService.deleteAdmin(id.toString()).pipe(
+        finalize(() => this.loading = false)
+      ).subscribe({
         next: () => {
+          // حذف من الـ array فوراً
           this.admins = this.admins.filter((a) => a.id !== id);
           this.stats.totalAdmins = this.admins.length;
           this.success = 'Admin deleted successfully';
+          // إخفاء رسالة النجاح بعد 3 ثواني
+          setTimeout(() => this.success = null, 3000);
+          // إعادة التحميل من السيرفر لضمان التزامن
+          this.loadDashboardData();
         },
-        error: () => {
+        error: (err) => {
           this.error = 'Failed to delete admin';
+          console.error('Delete error:', err);
+          // إخفاء رسالة الخطأ بعد 3 ثواني
+          setTimeout(() => this.error = null, 3000);
         }
       });
     }
@@ -264,7 +293,7 @@ export class AdminDashboardComponent implements OnInit {
           }
           this.showAddBoardMember = false;
           this.editingBoardMemberId = null;
-          this.boardMemberForm = { email: '', password: '', firstName: '', lastName: '', clubId: '', position: '', joinDate: '', season: new Date().getFullYear().toString() };
+          this.boardMemberForm = { email: '', password: '', firstName: '', lastName: '', clubId: '', position: '', joinDate: '', committee: '', season: new Date().getFullYear().toString() };
           this.success = 'Board member updated successfully';
         },
         error: () => {
@@ -278,7 +307,7 @@ export class AdminDashboardComponent implements OnInit {
           this.stats.totalBoardMembers = this.boardMembers.length;
           this.stats.activeBoardMembers = this.boardMembers.filter(m => m.isActive).length;
           this.showAddBoardMember = false;
-          this.boardMemberForm = { email: '', password: '', firstName: '', lastName: '', clubId: '', position: '', joinDate: '', season: new Date().getFullYear().toString() };
+          this.boardMemberForm = { email: '', password: '', firstName: '', lastName: '', clubId: '', position: '', joinDate: '', committee: '', season: new Date().getFullYear().toString() };
           this.success = 'Board member added successfully';
         },
         error: () => {
@@ -298,6 +327,7 @@ export class AdminDashboardComponent implements OnInit {
       clubId: member.clubId || '',
       position: member.position,
       joinDate: member.joinDate,
+      committee: member.committee || '',
       season: member.season || new Date().getFullYear().toString()
     };
     this.showAddBoardMember = true;
@@ -307,15 +337,21 @@ export class AdminDashboardComponent implements OnInit {
 
   deleteBoardMember(id: number): void {
     if (confirm('Are you sure you want to delete this board member?')) {
-      this.boardMemberService.deleteBoardMember(id.toString()).subscribe({
+      this.loading = true;
+      this.boardMemberService.deleteBoardMember(id.toString()).pipe(
+        finalize(() => this.loading = false)
+      ).subscribe({
         next: () => {
           this.boardMembers = this.boardMembers.filter((m) => m.id !== id);
           this.stats.totalBoardMembers = this.boardMembers.length;
           this.stats.activeBoardMembers = this.boardMembers.filter(m => m.isActive).length;
           this.success = 'Board member deleted successfully';
+          setTimeout(() => this.success = null, 3000);
         },
-        error: () => {
+        error: (err) => {
           this.error = 'Failed to delete board member';
+          console.error('Delete error:', err);
+          setTimeout(() => this.error = null, 3000);
         }
       });
     }
@@ -324,11 +360,17 @@ export class AdminDashboardComponent implements OnInit {
   submitCommittee(): void {
     this.error = null;
     this.success = null;
+    const matchedClub = this.clubs.find(c => c.name?.trim().toLowerCase() === this.committeeForm.clubName.trim().toLowerCase());
+    if (!matchedClub) {
+      this.error = 'Club name not found. Please select an existing club.';
+      return;
+    }
     const request = {
       name: this.committeeForm.name,
       description: this.committeeForm.description,
-      club: { id: Number(this.committeeForm.clubId) },
-      headId: this.committeeForm.headId
+      clubName: this.committeeForm.clubName,
+      headName: this.committeeForm.headName,
+      club: { id: Number(matchedClub.id) }
     };
 
     if (this.editingCommitteeId) {
@@ -340,7 +382,7 @@ export class AdminDashboardComponent implements OnInit {
           }
           this.showAddCommittee = false;
           this.editingCommitteeId = null;
-          this.committeeForm = { name: '', clubId: '', description: '', headId: '' };
+          this.committeeForm = { name: '', clubName: '', description: '', headName: '' };
           this.success = 'Committee updated successfully';
         },
         error: () => {
@@ -353,7 +395,7 @@ export class AdminDashboardComponent implements OnInit {
           this.committees = [...this.committees, created as any];
           this.stats.totalCommittees = this.committees.length;
           this.showAddCommittee = false;
-          this.committeeForm = { name: '', clubId: '', description: '', headId: '' };
+          this.committeeForm = { name: '', clubName: '', description: '', headName: '' };
           this.success = 'Committee created successfully';
         },
         error: err => {
@@ -368,9 +410,9 @@ export class AdminDashboardComponent implements OnInit {
     this.editingCommitteeId = committee.id;
     this.committeeForm = {
       name: committee.name,
-      clubId: committee.clubId || '',
+      clubName: committee.clubName || '',
       description: committee.description,
-      headId: committee.headId || ''
+      headName: committee.headName || ''
     };
     this.showAddCommittee = true;
     this.activeTab = 'committees';
@@ -379,16 +421,27 @@ export class AdminDashboardComponent implements OnInit {
 
   deleteCommittee(id: number): void {
     if (confirm('Are you sure you want to delete this committee?')) {
-      this.committeeService.deleteCommittee(id.toString()).subscribe({
+      this.loading = true;
+      this.committeeService.deleteCommittee(id.toString()).pipe(
+        finalize(() => this.loading = false)
+      ).subscribe({
         next: () => {
           this.committees = this.committees.filter((c) => c.id !== id);
           this.stats.totalCommittees = this.committees.length;
           this.success = 'Committee deleted successfully';
+          setTimeout(() => this.success = null, 3000);
         },
-        error: () => {
+        error: (err) => {
           this.error = 'Failed to delete committee';
+          console.error('Delete error:', err);
+          setTimeout(() => this.error = null, 3000);
         }
       });
     }
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }
