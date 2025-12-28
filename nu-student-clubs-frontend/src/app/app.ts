@@ -3,10 +3,10 @@ import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-root',
-  templateUrl: './app.html',
-  styleUrl: './app.css',
   standalone: true,
-  imports: [RouterModule]
+  imports: [RouterModule],
+  templateUrl: './app.html',
+  styleUrl: './app.css'
 })
 export class App {
   protected readonly title = signal('nu-student-clubs-frontend');

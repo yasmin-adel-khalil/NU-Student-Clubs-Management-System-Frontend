@@ -1,17 +1,18 @@
 import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
+import { ApiService } from './api.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class UserService {
+  constructor(private api: ApiService) { }
 
-  constructor() { }
-
-  getCurrentUser() {
-    // TODO: Implement get current user logic
+  getCurrentUser(): Observable<any> {
+    return this.api.get<any>('/api/user/profile');
   }
 
-  updateUserProfile(userData: any) {
-    // TODO: Implement update user profile logic
+  updateUserProfile(userData: any): Observable<any> {
+    return this.api.put<any>('/api/user/profile', userData);
   }
 }

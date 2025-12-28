@@ -8,26 +8,23 @@ import {
 } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
+import { Router } from '@angular/router';
 
 @Injectable()
 export class ErrorInterceptor implements HttpInterceptor {
 
-  constructor() { }
+  constructor(private router: Router) { }
 
   intercept(request: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
     return next.handle(request).pipe(
       catchError((error: HttpErrorResponse) => {
-        // TODO: Handle different error codes
-        console.error('HTTP Error:', error);
-        
         if (error.status === 401) {
-          // Unauthorized - redirect to login
+          this.router.navigate(['/auth/login']);
         } else if (error.status === 403) {
-          // Forbidden - show access denied message
-        } else if (error.status === 404) {
-          // Not found
-        } else if (error.status >= 500) {
-          // Server error
+          console.warn('Not authorized');
+        } else if (error.status === 400) {
+          // Validation errors returned by the server
+          console.warn('Validation error', error.error);
         }
 
         return throwError(() => error);

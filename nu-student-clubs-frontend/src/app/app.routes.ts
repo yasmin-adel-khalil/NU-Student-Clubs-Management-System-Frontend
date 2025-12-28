@@ -2,28 +2,29 @@ import { Routes } from '@angular/router';
 
 export const routes: Routes = [
   {
-    path: 'auth',
-    loadChildren: () => import('./pages/auth/auth.module').then(m => m.AuthModule)
+    path: 'admin',
+    loadChildren: () => import('./pages/admin/admin.module').then(m => m.AdminModule)
   },
   {
     path: 'dashboard',
-    loadChildren: () => import('./pages/dashboard/dashboard.module').then(m => m.DashboardModule)
+    pathMatch: 'full',
+    redirectTo: 'admin'
   },
   {
     path: 'clubs',
-    loadChildren: () => import('./pages/clubs/clubs.module').then(m => m.ClubsModule)
+    loadComponent: () => import('./pages/clubs/club-list.component').then(m => m.ClubListComponent)
   },
   {
     path: 'events',
-    loadChildren: () => import('./pages/events/events.module').then(m => m.EventsModule)
+    loadComponent: () => import('./pages/events/event-list.component').then(m => m.EventListComponent)
   },
   {
     path: 'gallery',
-    loadChildren: () => import('./pages/gallery/gallery.module').then(m => m.GalleryModule)
+    loadComponent: () => import('./pages/gallery/gallery-list.component').then(m => m.GalleryListComponent)
   },
   {
-    path: 'admin',
-    loadChildren: () => import('./pages/admin/admin.module').then(m => m.AdminModule)
+    path: 'auth',
+    loadChildren: () => import('./pages/auth/auth.module').then(m => m.AuthModule)
   },
   {
     path: '',

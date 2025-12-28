@@ -1,0 +1,253 @@
+<div class="min-h-screen bg-slate-50">
+  <!-- Header -->
+  <header class="border-b border-slate-200 bg-white/80 backdrop-blur sticky top-0 z-10">
+    <div class="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+      <div>
+        <h1 class="text-2xl font-bold text-slate-900">Committee Management</h1>
+        <p class="text-sm text-slate-500">Create and manage committees across clubs</p>
+      </div>
+      <button
+        (click)="openForm()"
+        class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+      >
+        Create Committee
+      </button>
+    </div>
+  </header>
+
+  <!-- Error Alert -->
+  @if (error) {
+    <div class="mx-auto max-w-7xl px-6 py-4">
+      <div class="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+        {{ error }}
+      </div>
+    </div>
+  }
+
+  <!-- Content -->
+  <div class="mx-auto max-w-7xl px-6 py-8">
+    <!-- Filters -->
+    <div class="mb-6 rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
+      <div class="grid gap-4 sm:grid-cols-3">
+        <div>
+          <label class="block text-sm font-medium text-slate-700">Search by name or club</label>
+          <input
+            type="text"
+            [(ngModel)]="searchTerm"
+            (input)="onSearchChange()"
+            placeholder="Search..."
+            class="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+          />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-slate-700">Filter by club</label>
+          <input
+            type="text"
+            [(ngModel)]="filterClub"
+            (input)="onFilterChange()"
+            placeholder="Club ID..."
+            class="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+          />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-slate-700">Filter by status</label>
+          <select
+            [(ngModel)]="filterStatus"
+            (change)="onFilterChange()"
+            class="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none"
+          >
+            <option value="all">All Status</option>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Committees Grid -->
+    <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      @for (committee of filteredCommittees; track committee.id) {
+        <div class="rounded-lg border border-slate-200 bg-white p-6 shadow-sm hover:shadow-md transition">
+          <div class="mb-4 flex items-start justify-between">
+            <div class="flex-1">
+              <h3 class="text-lg font-semibold text-slate-900">{{ committee.name }}</h3>
+              <p class="mt-1 text-xs text-slate-500">{{ committee.clubName || 'N/A' }}</p>
+            </div>
+            @if (committee.isActive) {
+              <span class="ml-2 inline-flex rounded-full bg-green-50 px-2 py-1 text-xs font-semibold text-green-700">
+                Active
+              </span>
+            } @else {
+              <span class="ml-2 inline-flex rounded-full bg-slate-100 px-2 py-1 text-xs font-semibold text-slate-700">
+                Inactive
+              </span>
+            }
+          </div>
+
+          <p class="text-sm text-slate-600">{{ committee.description }}</p>
+
+          <div class="mt-4 border-t border-slate-200 pt-4">
+            <div class="flex items-center justify-between">
+              <div class="text-sm">
+                <p class="text-xs text-slate-500">Committee Head</p>
+                <p class="font-medium text-slate-900">{{ committee.headName || 'N/A' }}</p>
+              </div>
+              <div class="text-right text-sm">
+                <p class="text-xs text-slate-500">Members</p>
+                <p class="font-medium text-slate-900">{{ committee.memberCount || 0 }}</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="mt-4 flex gap-2">
+            <button
+              (click)="viewMembers(committee.id)"
+              class="flex-1 rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+            >
+              View Members
+            </button>
+            <button
+              (click)="openForm(committee)"
+              class="flex-1 rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-slate-50"
+            >
+              Edit
+            </button>
+            <button
+              (click)="deleteCommittee(committee.id)"
+              class="flex-1 rounded-lg border border-red-300 px-3 py-2 text-xs font-semibold text-red-700 hover:bg-red-50"
+            >
+              Delete
+            </button>
+          </div>
+        </div>
+      } @empty {
+        <div class="col-span-full py-12 text-center">
+          @if (loading) {
+            <p class="text-sm text-slate-500">Loading committees...</p>
+          } @else {
+            <p class="text-sm text-slate-500">No committees found</p>
+          }
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- Form Modal -->
+  @if (showForm) {
+    <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+      <div class="w-full max-w-md rounded-lg bg-white p-6 shadow-lg">
+        <h2 class="text-xl font-bold text-slate-900">
+          {{ editingId ? 'Edit Committee' : 'Create Committee' }}
+        </h2>
+
+        <form [formGroup]="form" (ngSubmit)="submitForm()" class="mt-4 space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-slate-700">Committee Name</label>
+            <input
+              type="text"
+              formControlName="name"
+              class="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+            />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-slate-700">Club ID</label>
+            <input
+              type="text"
+              formControlName="clubId"
+              class="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+            />
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-slate-700">Description</label>
+            <textarea
+              formControlName="description"
+              rows="3"
+              class="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+            ></textarea>
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-slate-700">Committee Head ID</label>
+            <input
+              type="text"
+              formControlName="headId"
+              class="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+            />
+          </div>
+
+          <div class="flex items-center gap-2">
+            <input
+              type="checkbox"
+              formControlName="isActive"
+              id="isActive"
+              class="rounded border-slate-300"
+            />
+            <label for="isActive" class="text-sm font-medium text-slate-700">Active</label>
+          </div>
+
+          <div class="flex gap-2 pt-4">
+            <button
+              type="submit"
+              [disabled]="form.invalid"
+              class="flex-1 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
+            >
+              Save
+            </button>
+            <button
+              type="button"
+              (click)="closeForm()"
+              class="flex-1 rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+            >
+              Cancel
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+
+  <!-- Members Modal -->
+  @if (showMembersModal && selectedCommittee) {
+    <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+      <div class="w-full max-w-2xl rounded-lg bg-white p-6 shadow-lg max-h-96 overflow-y-auto">
+        <h2 class="text-xl font-bold text-slate-900">{{ selectedCommittee.name }} - Members</h2>
+
+        <div class="mt-4">
+          @if (selectedCommittee.members && selectedCommittee.members.length > 0) {
+            <table class="w-full text-sm">
+              <thead class="border-b border-slate-200 bg-slate-50">
+                <tr>
+                  <th class="px-4 py-2 text-left font-semibold text-slate-700">Member Name</th>
+                  <th class="px-4 py-2 text-left font-semibold text-slate-700">Role</th>
+                  <th class="px-4 py-2 text-left font-semibold text-slate-700">Join Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (member of selectedCommittee.members; track member.userId) {
+                  <tr class="border-b border-slate-200 hover:bg-slate-50">
+                    <td class="px-4 py-2 font-medium text-slate-900">{{ member.userName }}</td>
+                    <td class="px-4 py-2 text-slate-600">{{ member.role }}</td>
+                    <td class="px-4 py-2 text-slate-600">{{ member.joinDate | date: 'short' }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          } @else {
+            <p class="text-slate-500">No members in this committee</p>
+          }
+        </div>
+
+        <div class="mt-4 flex justify-end gap-2">
+          <button
+            (click)="closeMembers()"
+            class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

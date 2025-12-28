@@ -21,6 +21,7 @@ import { RouterModule } from '@angular/router';
           
           <nav class="hidden items-center gap-2 text-sm font-medium text-slate-600 lg:flex">
             <a routerLink="/" class="px-3 py-2 rounded-lg hover:bg-slate-100 transition">Home</a>
+            <a routerLink="/dashboard" class="px-3 py-2 rounded-lg hover:bg-slate-100 transition">Dashboard</a>
             <a routerLink="/clubs" class="px-3 py-2 rounded-lg hover:bg-slate-100 transition">Clubs</a>
             <a routerLink="/events" class="px-3 py-2 rounded-lg hover:bg-slate-100 transition">Events</a>
             <a routerLink="/gallery" class="px-3 py-2 rounded-lg hover:bg-slate-100 transition">Gallery</a>

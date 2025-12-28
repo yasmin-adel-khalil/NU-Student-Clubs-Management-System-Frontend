@@ -1,5 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://api.student-clubs.com/api',
-  apiTimeout: 30000
+  apiBaseUrl: 'http://localhost:8081'
 };

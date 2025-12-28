@@ -1,8 +1,9 @@
 import { NgModule, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule, Routes } from '@angular/router';
+import { RouterModule, Routes, Router } from '@angular/router';
 import { Component } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-auth',
@@ -106,6 +107,8 @@ export class AuthComponent { }
 })
 export class LoginComponent {
   private readonly fb = inject(FormBuilder);
+  private readonly auth = inject(AuthService);
+  private readonly router = inject(Router);
 
   private readonly emailPattern = /^[A-Za-z0-9._%+-]+@nu\.edu\.eg$/;
 
@@ -125,9 +128,14 @@ export class LoginComponent {
       this.loginForm.markAllAsTouched();
       return;
     }
-
-    // TODO: Wire up with real auth service
-    console.log('Login payload', this.loginForm.value);
+    const { email, password } = this.loginForm.value;
+    this.auth.login(email as string, password as string).subscribe({
+      next: () => this.router.navigateByUrl('/'),
+      error: (err) => {
+        const msg = err?.error?.message || 'Login failed';
+        alert(msg);
+      }
+    });
   }
 }
 
@@ -235,6 +243,8 @@ export class LoginComponent {
 })
 export class RegisterComponent {
   private readonly fb = inject(FormBuilder);
+  private readonly auth = inject(AuthService);
+  private readonly router = inject(Router);
 
   private readonly emailPattern = /^[A-Za-z0-9._%+-]+@nu\.edu\.eg$/;
   private readonly phonePattern = /^\d{11}$/;
@@ -257,9 +267,14 @@ export class RegisterComponent {
       this.registerForm.markAllAsTouched();
       return;
     }
-
-    // TODO: Replace with API call
-    console.log('Register payload', this.registerForm.value);
+    const payload = this.registerForm.value;
+    this.auth.signup(payload).subscribe({
+      next: () => this.router.navigateByUrl('/'),
+      error: (err) => {
+        const msg = err?.error?.message || 'Signup failed';
+        alert(msg);
+      }
+    });
   }
 }
 

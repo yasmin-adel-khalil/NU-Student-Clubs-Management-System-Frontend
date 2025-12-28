@@ -13,10 +13,9 @@ export class JwtInterceptor implements HttpInterceptor {
   constructor() { }
 
   intercept(request: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
-    // TODO: Add JWT token from localStorage to requests
     const token = localStorage.getItem('token');
-    
-    if (token) {
+    const isAuthEndpoint = request.url.includes('/api/auth/login') || request.url.includes('/api/auth/signup');
+    if (token && !isAuthEndpoint) {
       request = request.clone({
         setHeaders: {
           Authorization: `Bearer ${token}`
