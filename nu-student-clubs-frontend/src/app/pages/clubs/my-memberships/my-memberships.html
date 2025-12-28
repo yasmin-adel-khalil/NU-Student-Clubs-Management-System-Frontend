@@ -1,0 +1,125 @@
+<div class="min-h-screen bg-slate-50">
+  <!-- Header -->
+  <header class="border-b border-slate-200 bg-white/80 backdrop-blur sticky top-0 z-10">
+    <div class="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+      <div>
+        <h1 class="text-2xl font-bold text-slate-900">My Memberships</h1>
+        <p class="text-sm text-slate-500">View and manage your club memberships</p>
+      </div>
+    </div>
+  </header>
+
+  <!-- Success Alert -->
+  @if (successMessage) {
+    <div class="mx-auto max-w-7xl px-6 py-4">
+      <div class="rounded-lg border border-green-200 bg-green-50 p-4 text-sm text-green-700">
+        {{ successMessage }}
+      </div>
+    </div>
+  }
+
+  <!-- Error Alert -->
+  @if (error) {
+    <div class="mx-auto max-w-7xl px-6 py-4">
+      <div class="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+        {{ error }}
+      </div>
+    </div>
+  }
+
+  <!-- Content -->
+  <div class="mx-auto max-w-7xl px-6 py-8">
+    <!-- Loading State -->
+    @if (isLoading) {
+      <div class="flex items-center justify-center py-12">
+        <div class="text-center">
+          <div class="inline-block h-8 w-8 animate-spin rounded-full border-4 border-slate-300 border-t-blue-600"></div>
+          <p class="mt-2 text-sm text-slate-600">Loading your memberships...</p>
+        </div>
+      </div>
+    }
+
+    <!-- Empty State -->
+    @if (!isLoading && memberships.length === 0) {
+      <div class="rounded-lg border border-slate-200 bg-white p-12 text-center shadow-sm">
+        <svg class="mx-auto h-12 w-12 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.856-1.487M15 10a3 3 0 11-6 0 3 3 0 016 0zm7 9h-7" />
+        </svg>
+        <h3 class="mt-2 text-sm font-medium text-slate-900">No memberships yet</h3>
+        <p class="mt-1 text-sm text-slate-500">You haven't joined any clubs yet. Explore clubs and apply for membership!</p>
+        <button
+          (click)="viewClub(0)"
+          routerLink="/clubs"
+          class="mt-4 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700"
+        >
+          Browse Clubs
+        </button>
+      </div>
+    }
+
+    <!-- Memberships Table -->
+    @if (!isLoading && memberships.length > 0) {
+      <div class="rounded-lg border border-slate-200 bg-white shadow-sm">
+        <div class="overflow-x-auto">
+          <table class="w-full">
+            <thead class="border-b border-slate-200 bg-slate-50">
+              <tr>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-slate-700">Membership ID</th>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-slate-700">Club ID</th>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-slate-700">Joined Date</th>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-slate-700">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (membership of memberships; track membership.id) {
+                <tr class="border-b border-slate-200 hover:bg-slate-50">
+                  <td class="px-6 py-4 text-sm font-medium text-slate-900">{{ membership.id }}</td>
+                  <td class="px-6 py-4 text-sm text-slate-600">
+                    <button
+                      (click)="viewClub(membership.clubId)"
+                      class="text-blue-600 hover:text-blue-700 hover:underline"
+                    >
+                      Club #{{ membership.clubId }}
+                    </button>
+                  </td>
+                  <td class="px-6 py-4 text-sm text-slate-600">
+                    {{ membership.joinedAt | date: 'medium' }}
+                  </td>
+                  <td class="px-6 py-4 text-sm">
+                    <div class="flex gap-2">
+                      <button
+                        (click)="viewClub(membership.clubId)"
+                        class="text-blue-600 hover:text-blue-700"
+                      >
+                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                        </svg>
+                      </button>
+                      <button
+                        (click)="leaveMembership(membership.id)"
+                        class="text-red-600 hover:text-red-700"
+                        title="Leave club"
+                      >
+                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Summary Footer -->
+        <div class="border-t border-slate-200 bg-slate-50 px-6 py-4">
+          <p class="text-sm text-slate-600">
+            Total memberships: <span class="font-semibold text-slate-900">{{ memberships.length }}</span>
+          </p>
+        </div>
+      </div>
+    }
+  </div>
+</div>

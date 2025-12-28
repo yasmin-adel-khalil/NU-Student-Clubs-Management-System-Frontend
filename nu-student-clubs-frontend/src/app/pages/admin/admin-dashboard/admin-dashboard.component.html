@@ -1,0 +1,385 @@
+<div class="min-h-screen bg-slate-50">
+  <!-- Header -->
+  <header class="border-b border-slate-200 bg-white/80 backdrop-blur sticky top-0 z-10">
+    <div class="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+      <div>
+        <h1 class="text-2xl font-bold text-slate-900">Admin Dashboard</h1>
+        <p class="text-sm text-slate-500">Manage admins, board members, and committees</p>
+      </div>
+    </div>
+  </header>
+
+  <!-- Navigation Tabs -->
+  <div class="border-b border-slate-200 bg-white">
+    <div class="mx-auto flex max-w-7xl px-6">
+      <button
+        (click)="setActiveTab('overview')"
+        [class.border-blue-600]="activeTab === 'overview'"
+        [class.text-slate-600]="activeTab !== 'overview'"
+        class="border-b-2 border-transparent px-4 py-4 text-sm font-medium text-blue-600 transition"
+      >
+        Overview
+      </button>
+      <button
+        (click)="setActiveTab('admins')"
+        [class.border-blue-600]="activeTab === 'admins'"
+        [class.text-slate-600]="activeTab !== 'admins'"
+        class="border-b-2 border-transparent px-4 py-4 text-sm font-medium text-blue-600 transition"
+      >
+        Admins
+      </button>
+      <button
+        (click)="setActiveTab('board-members')"
+        [class.border-blue-600]="activeTab === 'board-members'"
+        [class.text-slate-600]="activeTab !== 'board-members'"
+        class="border-b-2 border-transparent px-4 py-4 text-sm font-medium text-blue-600 transition"
+      >
+        Board Members
+      </button>
+      <button
+        (click)="setActiveTab('committees')"
+        [class.border-blue-600]="activeTab === 'committees'"
+        [class.text-slate-600]="activeTab !== 'committees'"
+        class="border-b-2 border-transparent px-4 py-4 text-sm font-medium text-blue-600 transition"
+      >
+        Committees
+      </button>
+    </div>
+  </div>
+
+  <!-- Success Alert -->
+  @if (success) {
+    <div class="mx-auto max-w-7xl px-6 py-4">
+      <div class="rounded-lg border border-green-200 bg-green-50 p-4 text-sm text-green-700">
+        {{ success }}
+      </div>
+    </div>
+  }
+
+  <!-- Error Alert -->
+  @if (error) {
+    <div class="mx-auto max-w-7xl px-6 py-4">
+      <div class="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+        {{ error }}
+      </div>
+    </div>
+  }
+
+  <!-- Content -->
+  <div class="mx-auto max-w-7xl px-6 py-8">
+    <!-- Overview Tab -->
+    @if (activeTab === 'overview') {
+      <div class="space-y-8">
+        <!-- Stats Grid -->
+        <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <!-- Total Admins -->
+          <div class="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm text-slate-600">Total Admins</p>
+                <p class="mt-1 text-3xl font-bold text-slate-900">{{ stats.totalAdmins }}</p>
+              </div>
+              <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-blue-100 text-blue-600">
+                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          <!-- Total Board Members -->
+          <div class="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm text-slate-600">Board Members</p>
+                <p class="mt-1 text-3xl font-bold text-slate-900">{{ stats.totalBoardMembers }}</p>
+              </div>
+              <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-purple-100 text-purple-600">
+                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.856-1.487M15 10a3 3 0 11-6 0 3 3 0 016 0zM4.318 20H20v-2a4 4 0 00-7.225-1.62" />
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          <!-- Active Board Members -->
+          <div class="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm text-slate-600">Active Members</p>
+                <p class="mt-1 text-3xl font-bold text-slate-900">{{ stats.activeBoardMembers }}</p>
+              </div>
+              <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-green-100 text-green-600">
+                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          <!-- Total Committees -->
+          <div class="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm text-slate-600">Committees</p>
+                <p class="mt-1 text-3xl font-bold text-slate-900">{{ stats.totalCommittees }}</p>
+              </div>
+              <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-amber-100 text-amber-600">
+                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                </svg>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
+          <h2 class="mb-4 text-lg font-semibold text-slate-900">Quick Actions</h2>
+          <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <button (click)="openAddAdmin()" class="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-700 hover:bg-slate-100">
+              Add Admin
+            </button>
+            <button (click)="openAddBoardMember()" class="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-700 hover:bg-slate-100">
+              Add Board Member
+            </button>
+            <button (click)="openAddCommittee()" class="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-700 hover:bg-slate-100">
+              Create Committee
+            </button>
+            <button class="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-700 hover:bg-slate-100">
+              View Reports
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- Admins Tab -->
+    @if (activeTab === 'admins') {
+      <div class="rounded-lg border border-slate-200 bg-white shadow-sm">
+        <div class="flex items-center justify-between border-b border-slate-200 px-6 py-4">
+          <h2 class="text-lg font-semibold text-slate-900">Admin Information</h2>
+          <button (click)="openAddAdmin()" class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700">
+            Add Admin
+          </button>
+        </div>
+        @if (showAddAdmin) {
+          <div class="border-b border-slate-200 bg-slate-50 px-6 py-4">
+            <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              <label class="text-sm text-slate-700">
+                Name
+                <input [ngModel]="editingAdminId ? adminEditForm.name : adminForm.name" (ngModelChange)="editingAdminId ? (adminEditForm.name = $event) : (adminForm.name = $event)" class="mt-1 w-full rounded border border-slate-200 px-3 py-2 text-sm" placeholder="Admin name" />
+              </label>
+              <label class="text-sm text-slate-700">
+                Position
+                <input [ngModel]="editingAdminId ? adminEditForm.position : adminForm.position" (ngModelChange)="editingAdminId ? (adminEditForm.position = $event) : (adminForm.position = $event)" class="mt-1 w-full rounded border border-slate-200 px-3 py-2 text-sm" placeholder="e.g. SUPER" />
+              </label>
+              <label class="text-sm text-slate-700">
+                Club
+                <input [ngModel]="editingAdminId ? adminEditForm.club : adminForm.club" (ngModelChange)="editingAdminId ? (adminEditForm.club = $event) : (adminForm.club = $event)" class="mt-1 w-full rounded border border-slate-200 px-3 py-2 text-sm" placeholder="Club name" />
+              </label>
+              <label class="text-sm text-slate-700">
+                Season (Year)
+                <input type="number" [ngModel]="editingAdminId ? adminEditForm.season : adminForm.season" (ngModelChange)="editingAdminId ? (adminEditForm.season = $event) : (adminForm.season = $event)" class="mt-1 w-full rounded border border-slate-200 px-3 py-2 text-sm" placeholder="2025" />
+              </label>
+            </div>
+            <div class="mt-4 flex gap-2">
+              <button (click)="submitAdmin()" [disabled]="loading" class="rounded bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed">
+                @if (loading) {
+                  <span>Processing...</span>
+                } @else {
+                  <span>{{ editingAdminId ? 'Update' : 'Save' }}</span>
+                }
+              </button>
+              <button (click)="showAddAdmin=false; editingAdminId=null; adminForm={name:'',position:'',club:'',season: currentYear}; adminEditForm={name:'',position:'',club:'',season: currentYear}" [disabled]="loading" class="rounded border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100 disabled:opacity-50">Cancel</button>
+            </div>
+          </div>
+        }
+        <div class="overflow-x-auto">
+          <table class="w-full">
+            <thead class="border-b border-slate-200 bg-slate-50">
+              <tr>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-slate-700">Name</th>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-slate-700">Position</th>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-slate-700">Club</th>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-slate-700">Season</th>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-slate-700">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (admin of admins; track admin.id) {
+                <tr class="border-b border-slate-200 hover:bg-slate-50">
+                  <td class="px-6 py-4 text-sm font-medium text-slate-900">{{ admin.name }}</td>
+                  <td class="px-6 py-4 text-sm text-slate-600">{{ admin.position || 'N/A' }}</td>
+                  <td class="px-6 py-4 text-sm text-slate-600">{{ admin.club || 'N/A' }}</td>
+                  <td class="px-6 py-4 text-sm text-slate-600">{{ admin.committee || 'N/A' }}</td>
+                  <td class="px-6 py-4 text-sm text-slate-600">{{ admin.season || 'N/A' }}</td>
+                  <td class="px-6 py-4 text-sm">
+                    <div class="flex gap-2">
+                      <button (click)="editAdmin(admin)" class="text-blue-600 hover:text-blue-700 hover:underline">Edit</button>
+                      <button (click)="deleteAdmin(admin.id)" class="text-red-600 hover:text-red-700 hover:underline">Delete</button>
+                    </div>
+                  </td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="5" class="text-center py-4 text-gray-500">
+                    No admins found
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    }
+
+    <!-- Board Members Tab -->
+    @if (activeTab === 'board-members') {
+      <div class="rounded-lg border border-slate-200 bg-white shadow-sm">
+        <div class="flex items-center justify-between border-b border-slate-200 px-6 py-4">
+          <h2 class="text-lg font-semibold text-slate-900">Board Members</h2>
+          <button (click)="openAddBoardMember()" class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700">
+            Add Member
+          </button>
+        </div>
+        @if (showAddBoardMember) {
+          <div class="border-b border-slate-200 bg-slate-50 px-6 py-4">
+            <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <label class="text-sm text-slate-700">
+                Name
+                <input [(ngModel)]="boardMemberForm.firstName" class="mt-1 w-full rounded border border-slate-200 px-3 py-2 text-sm" placeholder="Member name" />
+              </label>
+              <label class="text-sm text-slate-700">
+                Position
+                <input [(ngModel)]="boardMemberForm.position" class="mt-1 w-full rounded border border-slate-200 px-3 py-2 text-sm" placeholder="PRESIDENT" />
+              </label>
+              <label class="text-sm text-slate-700">
+                Committee
+                <input [(ngModel)]="boardMemberForm.committee" class="mt-1 w-full rounded border border-slate-200 px-3 py-2 text-sm" placeholder="Committee name" />
+              </label>
+              <label class="text-sm text-slate-700">
+                Club
+                <input [(ngModel)]="boardMemberForm.clubId" class="mt-1 w-full rounded border border-slate-200 px-3 py-2 text-sm" placeholder="Club name" />
+              </label>
+              <label class="text-sm text-slate-700">
+                Season
+                <input [(ngModel)]="boardMemberForm.season" class="mt-1 w-full rounded border border-slate-200 px-3 py-2 text-sm" placeholder="2025" />
+              </label>
+            </div>
+            <div class="mt-4 flex gap-2">
+              <button (click)="submitBoardMember()" class="rounded bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700">{{ editingBoardMemberId ? 'Update' : 'Save' }}</button>
+              <button (click)="showAddBoardMember=false; editingBoardMemberId=null" class="rounded border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100">Cancel</button>
+            </div>
+          </div>
+        }
+        <div class="overflow-x-auto">
+          <table class="w-full">
+            <thead class="border-b border-slate-200 bg-slate-50">
+              <tr>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-slate-700">Name</th>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-slate-700">Position</th>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-slate-700">Committee</th>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-slate-700">Club</th>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-slate-700">Season</th>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-slate-700">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (member of boardMembers; track member.id) {
+                <tr class="border-b border-slate-200 hover:bg-slate-50">
+                  <td class="px-6 py-4 text-sm font-medium text-slate-900">{{ member.firstName }} {{ member.lastName }}</td>
+                  <td class="px-6 py-4 text-sm text-slate-600">{{ member.position }}</td>
+                  <td class="px-6 py-4 text-sm text-slate-600">{{ member.committee || 'N/A' }}</td>
+                  <td class="px-6 py-4 text-sm text-slate-600">{{ member.clubName || 'N/A' }}</td>
+                  <td class="px-6 py-4 text-sm text-slate-600">{{ member.season || 'N/A' }}</td>
+                  <td class="px-6 py-4 text-sm">
+                    <div class="flex gap-2">
+                      <button (click)="editBoardMember(member)" class="text-blue-600 hover:text-blue-700 hover:underline">Edit</button>
+                      <button (click)="deleteBoardMember(member.id)" class="text-red-600 hover:text-red-700 hover:underline">Delete</button>
+                    </div>
+                  </td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="6" class="px-6 py-8 text-center text-sm text-slate-500">
+                    No board members found
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    }
+
+    <!-- Committees Tab -->
+    @if (activeTab === 'committees') {
+      <div class="rounded-lg border border-slate-200 bg-white shadow-sm">
+        <div class="flex items-center justify-between border-b border-slate-200 px-6 py-4">
+          <h2 class="text-lg font-semibold text-slate-900">Committees</h2>
+          <button (click)="openAddCommittee()" class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700">
+            Create Committee
+          </button>
+        </div>
+        @if (showAddCommittee) {
+          <div class="border-b border-slate-200 bg-slate-50 px-6 py-4">
+            <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <label class="text-sm text-slate-700">
+                Name
+                <input [(ngModel)]="committeeForm.name" class="mt-1 w-full rounded border border-slate-200 px-3 py-2 text-sm" placeholder="Committee name" />
+              </label>
+              <label class="text-sm text-slate-700">
+                Club Name
+                <input [(ngModel)]="committeeForm.clubName" class="mt-1 w-full rounded border border-slate-200 px-3 py-2 text-sm" placeholder="Enter club name" />
+              </label>
+              <label class="text-sm text-slate-700">
+                Head Name
+                <input [(ngModel)]="committeeForm.headName" class="mt-1 w-full rounded border border-slate-200 px-3 py-2 text-sm" placeholder="Enter head name" />
+              </label>
+              <label class="text-sm text-slate-700 sm:col-span-2 lg:col-span-3">
+                Description
+                <textarea [(ngModel)]="committeeForm.description" class="mt-1 w-full rounded border border-slate-200 px-3 py-2 text-sm" rows="2" placeholder="What this committee does"></textarea>
+              </label>
+            </div>
+            <div class="mt-4 flex gap-2">
+              <button (click)="submitCommittee()" class="rounded bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-700">{{ editingCommitteeId ? 'Update' : 'Save' }}</button>
+              <button (click)="showAddCommittee=false; editingCommitteeId=null" class="rounded border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100">Cancel</button>
+            </div>
+          </div>
+        }
+        <div class="grid gap-6 p-6 sm:grid-cols-2 lg:grid-cols-3">
+          @for (committee of committees; track committee.id) {
+            <div class="rounded-lg border border-slate-200 p-4 hover:border-slate-300">
+              <div class="flex items-start justify-between">
+                <div>
+                  <h3 class="font-semibold text-slate-900">{{ committee.name }}</h3>
+                  <p class="mt-1 text-xs text-slate-500">{{ committee.clubName || 'N/A' }}</p>
+                </div>
+                @if (committee.isActive) {
+                  <span class="inline-flex rounded-full bg-green-50 px-2 py-1 text-xs font-semibold text-green-700">
+                    Active
+                  </span>
+                }
+              </div>
+              <p class="mt-3 text-sm text-slate-600">{{ committee.description }}</p>
+              <div class="mt-4 flex items-center justify-between border-t border-slate-200 pt-4">
+                <span class="text-xs text-slate-500">
+                  {{ committee.memberCount || 0 }} members
+                </span>
+                <div class="flex gap-2">
+                  <button (click)="editCommittee(committee)" class="text-xs text-blue-600 hover:text-blue-700 hover:underline">Edit</button>
+                  <button (click)="deleteCommittee(committee.id)" class="text-xs text-red-600 hover:text-red-700 hover:underline">Delete</button>
+                </div>
+              </div>
+            </div>
+          } @empty {
+            <div class="col-span-full py-8 text-center text-sm text-slate-500">
+              No committees found
+            </div>
+          }
+        </div>
+      </div>
+    }
+  </div>
+</div>

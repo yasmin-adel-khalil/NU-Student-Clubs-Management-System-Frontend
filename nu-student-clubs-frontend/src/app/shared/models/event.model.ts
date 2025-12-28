@@ -3,6 +3,7 @@ export interface Event {
   clubId: string;
   title: string;
   description: string;
+  eventDate?: Date | string;
   startDate: Date;
   endDate: Date;
   location: string;
