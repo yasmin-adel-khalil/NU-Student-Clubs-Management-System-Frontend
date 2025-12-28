@@ -1,27 +1,25 @@
+
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { environment } from '../../../environments/environment';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class ApiService {
-
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {}
 
   get<T>(endpoint: string) {
-    return this.http.get<T>(`${environment.apiUrl}${endpoint}`);
+    // endpoint أمثلة: '/api/clubs', '/api/committees'
+    return this.http.get<T>(endpoint);
   }
 
   post<T>(endpoint: string, data: any) {
-    return this.http.post<T>(`${environment.apiUrl}${endpoint}`, data);
+    return this.http.post<T>(endpoint, data);
   }
 
   put<T>(endpoint: string, data: any) {
-    return this.http.put<T>(`${environment.apiUrl}${endpoint}`, data);
+    return this.http.put<T>(endpoint, data);
   }
 
   delete<T>(endpoint: string) {
-    return this.http.delete<T>(`${environment.apiUrl}${endpoint}`);
+    return this.http.delete<T>(endpoint);
   }
 }

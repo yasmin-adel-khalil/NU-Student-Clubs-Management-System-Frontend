@@ -7,11 +7,13 @@ import { GalleryItem } from '../../shared/models/gallery.model';
 export class GalleryService {
   constructor(private api: ApiService) {}
 
+  private base = '/api/gallery';
+
   getClubGallery(clubId: string): Observable<GalleryItem[]> {
-    return this.api.get<GalleryItem[]>(`/gallery/club/${clubId}`);
+    return this.api.get<GalleryItem[]>(`${this.base}/club/${clubId}`);
   }
 
   uploadClubImage(payload: { title: string; description: string; imageUrl: string; clubId: string }): Observable<GalleryItem> {
-    return this.api.post<GalleryItem>('/gallery', payload);
+    return this.api.post<GalleryItem>(this.base, payload);
   }
 }
