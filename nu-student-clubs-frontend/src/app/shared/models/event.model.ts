@@ -4,14 +4,14 @@ export interface Event {
   title: string;
   description: string;
   eventDate?: Date | string;
-  startDate: Date;
-  endDate: Date;
+  startDate: Date | string;
+  endDate: Date | string;
   location: string;
   capacity: number;
   attendeeCount: number;
   imageUrl: string;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: Date | string;
+  updatedAt: Date | string;
 }
 
 export interface EventAttendance {

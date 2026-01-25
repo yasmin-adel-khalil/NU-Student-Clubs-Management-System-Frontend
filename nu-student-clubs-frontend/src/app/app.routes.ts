@@ -1,9 +1,12 @@
 import { Routes } from '@angular/router';
+import { AuthGuard } from './core/guards/auth.guard';
+import { AdminGuard } from './core/guards/admin.guard';
 
 export const routes: Routes = [
   {
     path: 'admin',
-    loadChildren: () => import('./pages/admin/admin.module').then(m => m.AdminModule)
+    loadChildren: () => import('./pages/admin/admin.module').then(m => m.AdminModule),
+    canActivate: [AuthGuard, AdminGuard]
   },
   {
     path: 'dashboard',
@@ -17,10 +20,6 @@ export const routes: Routes = [
   {
     path: 'events',
     loadComponent: () => import('./pages/events/event-list.component').then(m => m.EventListComponent)
-  },
-  {
-    path: 'gallery',
-    loadComponent: () => import('./pages/gallery/gallery-list.component').then(m => m.GalleryListComponent)
   },
   {
     path: 'auth',

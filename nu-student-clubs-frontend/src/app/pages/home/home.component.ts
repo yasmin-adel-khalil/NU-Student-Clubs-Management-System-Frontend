@@ -20,11 +20,9 @@ import { RouterModule } from '@angular/router';
           </div>
           
           <nav class="hidden items-center gap-2 text-sm font-medium text-slate-600 lg:flex">
-            <a routerLink="/" class="px-3 py-2 rounded-lg hover:bg-slate-100 transition">Home</a>
             <a routerLink="/dashboard" class="px-3 py-2 rounded-lg hover:bg-slate-100 transition">Dashboard</a>
             <a routerLink="/clubs" class="px-3 py-2 rounded-lg hover:bg-slate-100 transition">Clubs</a>
             <a routerLink="/events" class="px-3 py-2 rounded-lg hover:bg-slate-100 transition">Events</a>
-            <a routerLink="/gallery" class="px-3 py-2 rounded-lg hover:bg-slate-100 transition">Gallery</a>
           </nav>
 
           <div class="flex items-center gap-3">
@@ -117,20 +115,6 @@ import { RouterModule } from '@angular/router';
             <h3 class="text-sm font-bold text-slate-900 mb-2">Photo Gallery</h3>
             <p class="text-xs text-slate-600">Share memories and showcase your club's activities.</p>
           </div>
-        </div>
-      </section>
-
-      <!-- CTA Section -->
-      <section class="mx-auto max-w-6xl px-6 py-16 text-center">
-        <div class="rounded-2xl bg-gradient-to-r from-blue-600 to-blue-700 p-12 text-white">
-          <h2 class="text-3xl font-bold mb-4">Ready to manage your club?</h2>
-          <p class="mb-8 text-lg text-blue-100">Join thousands of NU students already using our platform.</p>
-          <a
-            routerLink="/auth/register"
-            class="inline-block rounded-lg bg-white px-8 py-3 text-base font-bold text-blue-600 hover:bg-blue-50 transition"
-          >
-            Create Account Now
-          </a>
         </div>
       </section>
 

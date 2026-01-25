@@ -2,14 +2,17 @@ import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
 
-export const AuthGuard: CanActivateFn = () => {
+export const AdminGuard: CanActivateFn = () => {
   const authService = inject(AuthService);
   const router = inject(Router);
   
-  const token = authService.getToken();
-  if (token) {
+  const currentUser = authService.getCurrentUser();
+  
+  if (currentUser && currentUser.role === 'ADMIN') {
     return true;
   }
-  router.navigate(['/auth/login']);
+  
+  // Redirect to home if not admin
+  router.navigate(['/']);
   return false;
 };

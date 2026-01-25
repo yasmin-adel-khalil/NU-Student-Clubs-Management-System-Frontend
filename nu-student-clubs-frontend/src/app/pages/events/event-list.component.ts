@@ -1,160 +1,201 @@
 import { CommonModule } from '@angular/common';
-import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Event } from '../../shared/models/event.model';
-import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-event-list',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, HttpClientModule],
+  imports: [CommonModule],
   template: `
-    <section class="max-w-5xl mx-auto p-4 space-y-6">
-      <div class="flex flex-col gap-1">
-        <h1 class="text-2xl font-semibold">Events</h1>
-        <p class="text-sm text-gray-600">Browse upcoming events and add new ones.</p>
+    <section class="max-w-6xl mx-auto p-6 space-y-8">
+      <div class="flex flex-col gap-2">
+        <h1 class="text-3xl font-bold text-gray-900">Upcoming Events</h1>
+        <p class="text-gray-600">Discover and join exciting events happening at NU</p>
       </div>
 
-      <div class="grid gap-4 sm:grid-cols-2">
-        <article *ngFor="let evt of events" class="rounded-lg border bg-white shadow-sm p-4 flex flex-col gap-2">
-          <div class="flex items-start justify-between gap-3">
+      <div *ngIf="loading" class="text-center py-12">
+        <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+        <p class="mt-4 text-gray-600">Loading events...</p>
+      </div>
+
+      <div *ngIf="!loading && events.length === 0" class="text-center py-12 bg-gray-50 rounded-lg">
+        <p class="text-gray-600">No events available at the moment.</p>
+      </div>
+
+      <div *ngIf="!loading && events.length > 0" class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <article *ngFor="let evt of events" 
+                 class="rounded-xl border border-gray-200 bg-white shadow-sm hover:shadow-lg transition-shadow overflow-hidden">
+          <div class="h-40 bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+            <span class="text-5xl">📅</span>
+          </div>
+          
+          <div class="p-5 space-y-3">
             <div>
-              <h2 class="text-lg font-semibold text-gray-900">{{ evt.title }}</h2>
-              <p class="text-sm text-gray-600">{{ evt.location }}</p>
+              <h2 class="text-xl font-bold text-gray-900 mb-1">{{ evt.title }}</h2>
+              <div class="flex items-center gap-2 text-sm text-gray-600">
+                <span>📍</span>
+                <span>{{ evt.location }}</span>
+              </div>
             </div>
-            <span class="text-sm text-indigo-700 font-medium">
-              {{ getEventDate(evt) | date: 'mediumDate' }}
-            </span>
+            
+            <p class="text-sm text-gray-700 line-clamp-2">{{ evt.description }}</p>
+            
+            <div class="pt-3 border-t border-gray-100">
+              <div class="flex items-center justify-between">
+                <span class="text-sm font-semibold text-indigo-600">
+                  {{ getEventDate(evt) | date: 'MMM dd, yyyy' }}
+                </span>
+                <span class="text-xs text-gray-500" *ngIf="evt.capacity">
+                  {{ evt.attendeeCount || 0 }} / {{ evt.capacity }} attendees
+                </span>
+              </div>
+            </div>
           </div>
-          <p class="text-sm text-gray-700" *ngIf="evt.description">{{ evt.description }}</p>
         </article>
-        <div *ngIf="!events.length && !loading" class="col-span-full text-sm text-gray-600">No events available.</div>
-        <div *ngIf="loading" class="col-span-full text-sm text-gray-600">Loading events…</div>
-      </div>
-
-      <div class="rounded-lg border bg-white shadow-sm p-5">
-        <h2 class="text-xl font-semibold mb-3">Create Event</h2>
-        <form [formGroup]="form" (ngSubmit)="createEvent()" class="space-y-4">
-          <div class="grid gap-4 md:grid-cols-2">
-            <label class="block space-y-1">
-              <span class="text-sm font-medium">Title</span>
-              <input type="text" formControlName="title" class="w-full rounded border p-2" placeholder="Event title" />
-              <span *ngIf="isInvalid('title')" class="text-xs text-red-600">Title is required.</span>
-            </label>
-
-            <label class="block space-y-1">
-              <span class="text-sm font-medium">Location</span>
-              <input type="text" formControlName="location" class="w-full rounded border p-2" placeholder="Event location" />
-              <span *ngIf="isInvalid('location')" class="text-xs text-red-600">Location is required.</span>
-            </label>
-
-            <label class="block space-y-1">
-              <span class="text-sm font-medium">Event Date</span>
-              <input type="date" formControlName="eventDate" class="w-full rounded border p-2" />
-              <span *ngIf="isInvalid('eventDate')" class="text-xs text-red-600">Event date is required.</span>
-            </label>
-
-            <label class="block space-y-1">
-              <span class="text-sm font-medium">Club ID</span>
-              <input type="text" formControlName="clubId" class="w-full rounded border p-2" placeholder="Club identifier" />
-              <span *ngIf="isInvalid('clubId')" class="text-xs text-red-600">Club ID is required.</span>
-            </label>
-          </div>
-
-          <label class="block space-y-1">
-            <span class="text-sm font-medium">Description</span>
-            <textarea formControlName="description" rows="3" class="w-full rounded border p-2" placeholder="Event description"></textarea>
-          </label>
-
-          <div class="flex items-center gap-3">
-            <button type="submit" [disabled]="form.invalid || submitting" class="px-4 py-2 rounded bg-indigo-600 text-white disabled:bg-gray-400">
-              {{ submitting ? 'Creating…' : 'Create Event' }}
-            </button>
-            <span *ngIf="successMessage" class="text-sm text-green-600">{{ successMessage }}</span>
-            <span *ngIf="errorMessage" class="text-sm text-red-600">{{ errorMessage }}</span>
-          </div>
-        </form>
       </div>
     </section>
   `
 })
 export class EventListComponent implements OnInit {
-  events: Event[] = [];
+  events: any[] = [];
   loading = false;
-  submitting = false;
-  successMessage = '';
-  errorMessage = '';
-  form!: FormGroup;
 
-  constructor(private http: HttpClient, private fb: FormBuilder) {}
+  constructor() {}
 
   ngOnInit(): void {
-    this.form = this.fb.group({
-      title: ['', Validators.required],
-      description: [''],
-      location: ['', Validators.required],
-      eventDate: ['', Validators.required],
-      clubId: ['', Validators.required]
-    });
     this.loadEvents();
   }
 
   loadEvents(): void {
     this.loading = true;
-    this.http.get<Event[]>(`${environment.apiBaseUrl}/events`).subscribe({
-      next: data => {
-        this.events = data || [];
-        this.loading = false;
-      },
-      error: () => {
-        this.events = [];
-        this.loading = false;
-        this.errorMessage = 'Could not load events';
-      }
-    });
+    
+    const now = new Date();
+      
+    this.events = [
+        {
+          id: '1',
+          clubId: '1',
+          title: 'Tech Workshop: Web Development',
+          description: 'Learn modern web development techniques with hands-on projects',
+          eventDate: new Date(now.getTime() + 24 * 60 * 60 * 1000),
+          startDate: new Date(now.getTime() + 24 * 60 * 60 * 1000),
+          endDate: new Date(now.getTime() + 24 * 60 * 60 * 1000),
+          location: 'Tech Lab, Building A',
+          capacity: 50,
+          attendeeCount: 20,
+          imageUrl: ''
+        },
+        {
+          id: '2',
+          clubId: '2',
+          title: 'Football Tournament',
+          description: 'Inter-club football championship - Join us for an exciting competition',
+          startDate: new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+          endDate: new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+          eventDate: new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+          location: 'Sports Complex',
+          capacity: 100,
+          attendeeCount: 45,
+          imageUrl: 'https://via.placeholder.com/300x200',
+          createdAt: now.toISOString(),
+          updatedAt: now.toISOString()
+        },
+        {
+          id: '3',
+          clubId: '1',
+          title: 'AI & Machine Learning Workshop',
+          description: 'Introduction to artificial intelligence and machine learning fundamentals',
+          startDate: new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000).toISOString(),
+          endDate: new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000).toISOString(),
+          eventDate: new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000).toISOString(),
+          location: 'Computer Lab 301',
+          capacity: 40,
+          attendeeCount: 15,
+          imageUrl: 'https://via.placeholder.com/300x200',
+          createdAt: now.toISOString(),
+          updatedAt: now.toISOString()
+        },
+        {
+          id: '4',
+          clubId: '2',
+          title: 'Basketball Championship',
+          description: 'Annual basketball tournament for all students - Show your skills!',
+          startDate: new Date(now.getTime() + 10 * 24 * 60 * 60 * 1000).toISOString(),
+          endDate: new Date(now.getTime() + 10 * 24 * 60 * 60 * 1000).toISOString(),
+          eventDate: new Date(now.getTime() + 10 * 24 * 60 * 60 * 1000).toISOString(),
+          location: 'Basketball Court',
+          capacity: 80,
+          attendeeCount: 32,
+          imageUrl: 'https://via.placeholder.com/300x200',
+          createdAt: now.toISOString(),
+          updatedAt: now.toISOString()
+        },
+        {
+          id: '5',
+          clubId: '1',
+          title: 'Hackathon 2026',
+          description: '24-hour coding competition with amazing prizes and networking opportunities',
+          startDate: new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000).toISOString(),
+          endDate: new Date(now.getTime() + 15 * 24 * 60 * 60 * 1000).toISOString(),
+          eventDate: new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000).toISOString(),
+          location: 'Innovation Hub',
+          capacity: 60,
+          attendeeCount: 28,
+          imageUrl: 'https://via.placeholder.com/300x200',
+          createdAt: now.toISOString(),
+          updatedAt: now.toISOString()
+        },
+        {
+          id: '6',
+          clubId: '2',
+          title: 'Yoga & Fitness Session',
+          description: 'Weekly yoga and fitness training for all levels - Improve your wellness',
+          startDate: new Date(now.getTime() + 2 * 24 * 60 * 60 * 1000).toISOString(),
+          endDate: new Date(now.getTime() + 2 * 24 * 60 * 60 * 1000).toISOString(),
+          eventDate: new Date(now.getTime() + 2 * 24 * 60 * 60 * 1000).toISOString(),
+          location: 'Gym Hall',
+          capacity: 30,
+          attendeeCount: 18,
+          imageUrl: 'https://via.placeholder.com/300x200',
+          createdAt: now.toISOString(),
+          updatedAt: now.toISOString()
+        },
+        {
+          id: '7',
+          clubId: '1',
+          title: 'Cybersecurity Seminar',
+          description: 'Learn about the latest trends in cybersecurity and ethical hacking',
+          startDate: new Date(now.getTime() + 5 * 24 * 60 * 60 * 1000).toISOString(),
+          endDate: new Date(now.getTime() + 5 * 24 * 60 * 60 * 1000).toISOString(),
+          eventDate: new Date(now.getTime() + 5 * 24 * 60 * 60 * 1000).toISOString(),
+          location: 'Auditorium B',
+          capacity: 100,
+          attendeeCount: 67,
+          imageUrl: 'https://via.placeholder.com/300x200',
+          createdAt: now.toISOString(),
+          updatedAt: now.toISOString()
+        },
+        {
+          id: '8',
+          clubId: '2',
+          title: 'Swimming Competition',
+          description: 'Inter-university swimming championship - Compete and win medals',
+          startDate: new Date(now.getTime() + 20 * 24 * 60 * 60 * 1000).toISOString(),
+          endDate: new Date(now.getTime() + 20 * 24 * 60 * 60 * 1000).toISOString(),
+          eventDate: new Date(now.getTime() + 20 * 24 * 60 * 60 * 1000).toISOString(),
+          location: 'Olympic Pool',
+          capacity: 50,
+          attendeeCount: 22,
+          imageUrl: 'https://via.placeholder.com/300x200',
+          createdAt: now.toISOString(),
+          updatedAt: now.toISOString()
+        }
+      ];
+      
+      this.loading = false;
   }
 
-  getEventDate(evt: Event): Date | string | null {
-    const raw = (evt as any).eventDate ?? (evt as any).startDate;
-    return raw || null;
-  }
-
-  isInvalid(control: string): boolean {
-    const c = this.form.get(control);
-    return !!c && c.invalid && (c.touched || c.dirty);
-  }
-
-  createEvent(): void {
-    if (this.form.invalid || this.submitting) {
-      this.form.markAllAsTouched();
-      return;
-    }
-
-    this.submitting = true;
-    this.successMessage = '';
-    this.errorMessage = '';
-
-    const { title, description, location, eventDate, clubId } = this.form.value;
-    const payload = {
-      title,
-      description,
-      location,
-      eventDate: eventDate ? new Date(eventDate).toISOString() : null,
-      clubId
-    };
-
-    this.http.post(`${environment.apiBaseUrl}/events`, payload).subscribe({
-      next: () => {
-        this.submitting = false;
-        this.successMessage = 'Event created successfully';
-        this.form.reset();
-        this.loadEvents();
-      },
-      error: () => {
-        this.submitting = false;
-        this.errorMessage = 'Failed to create event';
-      }
-    });
+  getEventDate(evt: any): Date | string | null {
+    return evt.eventDate || evt.startDate || null;
   }
 }
